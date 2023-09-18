@@ -1,0 +1,54 @@
+import fitz  
+import subprocess
+import os
+import tkinter as tk
+from tkinter import filedialog
+
+
+def extraer_texto_desde_pdf(pdf_path, txt_path):
+    texto_pdf = ""
+    documento = fitz.open(pdf_path)
+
+    for pagina_num in range(documento.page_count):
+        pagina = documento[pagina_num]
+        texto_pdf += pagina.get_text()
+
+    with open(txt_path, "w", encoding="utf-8") as txt_file:
+        txt_file.write(texto_pdf)
+
+
+def convertir_pdf_a_txt():
+    archivo_pdf = filedialog.askopenfilename(filetypes=[("Archivos PDF", "*.pdf")])
+
+    if archivo_pdf:
+        archivo_txt = archivo_pdf.replace(".pdf", ".txt")
+        extraer_texto_desde_pdf(archivo_pdf, archivo_txt)
+
+        if os.path.exists(archivo_txt):
+            subprocess.Popen(["notepad.exe", archivo_txt])
+        else:
+            resultado_label.config(text=f"No se pudo encontrar el archivo {archivo_txt}")
+
+
+def cerrar_aplicacion():
+    ventana.destroy()
+
+
+ventana = tk.Tk()
+ventana.title("Conversor PDF a TXT")
+
+
+ventana.configure(bg="#add8e6")  # Fondo en azul celeste
+
+
+boton_seleccionar = tk.Button(ventana, text="Seleccionar PDF", command=convertir_pdf_a_txt, bg="green", fg="white")
+boton_seleccionar.pack(pady=20)
+
+boton_cerrar = tk.Button(ventana, text="Cerrar", command=cerrar_aplicacion, bg="red", fg="white")
+boton_cerrar.pack(pady=10)
+
+
+resultado_label = tk.Label(ventana, text="")
+resultado_label.pack()
+
+ventana.mainloop()
