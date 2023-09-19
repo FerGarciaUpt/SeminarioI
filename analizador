@@ -1,0 +1,64 @@
+#Importar librerias
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
+#Definir rutas del archivo
+filepath_dict={'yelp': r'C:\Users\FER\PycharmProjects\clasificacion\data\sentiment labelled sentences\yelp_labelled.txt',              #llama dataset
+               'amazon': r'C:\Users\FER\PycharmProjects\clasificacion\data\sentiment labelled sentences\amazon_cells_labelled.txt',
+              'imdb': r'C:\Users\FER\PycharmProjects\clasificacion\data\sentiment labelled sentences\imdb_labelled.txt'}
+#crear lista vacía para almacenamiento
+df_list=[]
+#insertar rutas
+for source,filepath in filepath_dict.items():
+    df = pd.read_csv(filepath, names=['sentence', 'label'], sep='\t') # Leer un archivo CSV asignando nombres a las columnas y usando '\t' como separador
+    df['source'] = source# Agregar una columna llamada 'source'
+    df_list.append(df) #Agregar el DataFrame a la lista
+    df = pd.concat(df_list)# Concatenar todos los Data
+    print(df.iloc[0]) # Imprimir la primera fila del DataFrame concatenado
+
+
+
+
+
+df_yelp = df[df['source'] == 'yelp']# Filtrar el DataFrame original 'df' para obtener solo las filas de la fuente
+
+sentences = df_yelp['sentence'].values# Extraer las oraciones y etiquetas
+y = df_yelp['label'].values
+# Extraer las oraciones y etiquetas
+sentences_train, sentences_test, y_train, y_test = train_test_split(
+ sentences, y, test_size=0.25, random_state=1000)
+
+
+# Crear un vectorizador CountVectorizer y ajustarlo al conjunto de entrenamiento
+vectorizer = CountVectorizer()
+vectorizer.fit(sentences_train)
+# Crear un vectorizador CountVectorizer y ajustarlo al conjunto de entrenamiento en vectores de características
+X_train = vectorizer.transform(sentences_train)
+X_test  = vectorizer.transform(sentences_test)
+X_train
+
+# Crear un clasificador de regresión logística y ajustarlo al conjunto de entrenamiento
+classifier = LogisticRegression()
+classifier = LogisticRegression()
+classifier.fit(X_train, y_train)
+score = classifier.score(X_test, y_test)# Calcular la precisión del modelo
+
+print("Accuracy:", score)# Imprimir la precisión
+for source in df['source'].unique(): # Iterar a través de las fuentes únicas en el DataFrame
+    df_source = df[df['source'] == source] # Filtrar el DataFrame para obtener solo las filas de la fuente actual
+    sentences = df_source['sentence'].values
+    y = df_source['label'].values
+
+    sentences_train, sentences_test, y_train, y_test = train_test_split(
+        sentences, y, test_size=0.25, random_state=1000)
+
+    vectorizer = CountVectorizer()
+    vectorizer.fit(sentences_train)
+    X_train = vectorizer.transform(sentences_train)
+    X_test  = vectorizer.transform(sentences_test)
+
+    classifier = LogisticRegression()
+    classifier.fit(X_train, y_train)
+    score = classifier.score(X_test, y_test)
+    print('Accuracy for {} data: {:.4f}'.format(source, score))
