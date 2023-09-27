@@ -1,0 +1,34 @@
+#Programa replicado de https://python.plainenglish.io/text-similarity-measures-7be7e63f51f3
+#Similitud de Jaccard
+doc1, doc2='Me gustan los perros.', 'Odio los perros.'
+# Dividir los documentos y crear tokens
+doc1_tokens= set (doc1.lower().split())
+doc2_tokens= set (doc2.lower().split())
+#Imprimir los tokens
+print(doc1_tokens,doc2_tokens)
+# Calcular la similitud de Jaccard
+jaccard_similarity=   len (doc1_tokens.intersection(doc2_tokens))/ len (doc1_tokens.union(doc2_tokens))
+# Imprimir la puntuación de Jaccard Simialrity
+print(jaccard_similarity)
+#similutud del coseno
+# Importemos la extracción de características de texto TfidfVectorizer  desde
+from sklearn.feature_extraction.text import TfidfVectorizer
+# Importar métrica de similitud de Cosienesde
+from sklearn.metrics.pairwise import cosine_similarity
+docs=['Me gustan los perros.', 'Odio los perros.']
+# Crear TFidfVectorizer
+tfidf= TfidfVectorizer()
+# Ajustar y transformar los documentos
+tfidf_vector = tfidf.fit_transform(docs)
+# Calcular la similitud del coseno
+cosine_sim=cosine_similarity(tfidf_vector, tfidf_vector)
+# Imprime la similitud del coseno
+print(cosine_sim)
+
+
+from scipy import spatial
+# Document Vectorization
+doc1, doc2 = nlp('I like apples.').vector, nlp('I like oranges.').vector
+# Cosine Similarity
+result = 1 - spatial.distance.cosine(doc1, doc2)
+print(result)
