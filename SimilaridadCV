@@ -1,0 +1,115 @@
+#Autor:MF_GM
+#Similariad de CV
+
+
+
+import tkinter as tk
+from tkinter import filedialog
+import fitz
+import os
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+
+# Función para cargar un archivo PDF y convertirlo a TXT
+def cargar_pdf():
+    file_path = filedialog.askopenfilename(filetypes=[("PDF Files", "*.pdf")])
+    if file_path:
+        txt_file = pdf_to_txt(file_path)
+        resultado_label.config(text="PDF convertido a TXT: " + txt_file)
+
+
+# Función para convertir un archivo PDF en texto
+def pdf_to_txt(pdf_file):
+    # Obtener el nombre del archivo sin extensión
+    file_name = os.path.splitext(os.path.basename(pdf_file))[0]
+
+    # Crear un archivo TXT
+    txt_file = file_name + ".txt"
+
+    doc = fitz.open(pdf_file)
+
+    # Procesar las páginas del PDF
+    text = ""
+    for page_num in range(len(doc)):
+        page = doc[page_num]
+        text += page.get_text()
+
+    # Guardar el texto en el archivo TXT
+    with open(txt_file, "w", encoding="utf-8") as f:
+        f.write(text)
+
+    return txt_file
+
+
+# Función para cargar archivos TXT
+def cargar_archivo(entrada):
+    file_path = filedialog.askopenfilename(filetypes=[("Text Files", "*.txt")])
+    if file_path:
+        entrada.delete(0, tk.END)
+        entrada.insert(0, file_path)
+
+
+# Función para medir la similitud entre dos archivos de texto por coseno
+def medir_similitud():
+    archivo1 = archivo1_entry.get()
+    archivo2 = archivo2_entry.get()
+
+    if not os.path.exists(archivo1) or not os.path.exists(archivo2):
+        resultado_label.config(text="Los archivos no existen.",background="red2")
+        return
+
+    with open(archivo1, "r", encoding="utf-8") as f1, open(archivo2, "r", encoding="utf-8") as f2:
+        texto1 = f1.read()
+        texto2 = f2.read()
+
+    # Utilizar CountVectorizer para convertir texto en vectores de términos
+    vectorizer = CountVectorizer().fit_transform([texto1, texto2])
+    vectors = vectorizer.toarray()
+
+    # Calcular la similitud por coseno entre los vectores
+    similarity = cosine_similarity(vectors)[0][1]
+    resultado_label.config(text=f"Similitud por coseno entre archivos: {similarity:.2f}",background="DarkOliveGreen1")
+
+
+# Crear una ventana tkinter
+root = tk.Tk()
+root.title("Comparador de CV ")
+root.config(bg="light cyan")
+# Crear etiqueta de título
+titulo_label = tk.Label(root, text="Comparador de CV ", font=("Comic Sans MS", 16),bg="light cyan")
+titulo_label.pack(pady=10)
+
+# Botón para cargar un archivo PDF
+cargar_button = tk.Button(root, text="Cargar PDF", command=cargar_pdf,background="plum3",font=("Comic Sans MS", 12))
+cargar_button.pack()
+
+# Botón para cargar archivo 1 (TXT)
+archivo1_label = tk.Label(root, text="Archivo 1 (TXT):",bg="light cyan",font=("Comic Sans MS", 12))
+archivo1_label.pack()
+archivo1_entry = tk.Entry(root)
+archivo1_entry.pack()
+cargar_archivo1_button = tk.Button(root, text="Cargar Archivo 1", command=lambda: cargar_archivo(archivo1_entry),background="plum4",font=("Comic Sans MS", 12))
+cargar_archivo1_button.pack()
+
+# Botón para cargar archivo 2 (TXT)
+archivo2_label = tk.Label(root, text="Archivo 2 (TXT):",bg="light cyan",font=("Comic Sans MS", 12))
+archivo2_label.pack()
+archivo2_entry = tk.Entry(root)
+archivo2_entry.pack()
+cargar_archivo2_button = tk.Button(root, text="Cargar Archivo 2", command=lambda: cargar_archivo(archivo2_entry),background="PaleVioletRed1",font=("Comic Sans MS", 12))
+cargar_archivo2_button.pack()
+
+# Botón para medir similitud
+medir_button = tk.Button(root, text="Medir Similitud", command=medir_similitud,background="SeaGreen1",font=("Comic Sans MS", 12))
+medir_button.pack()
+
+# Etiqueta para mostrar el resultado
+resultado_label = tk.Label(root, text="", font=("Comic Sans MS", 12),background="OliveDrab1")
+resultado_label.pack(pady=10)
+
+# Botón de cierre
+cerrar_button = tk.Button(root, text="Cerrar", command=root.quit,background="red",font=("Comic Sans MS", 12))
+cerrar_button.pack()
+
+root.mainloop()
